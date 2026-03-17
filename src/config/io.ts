@@ -822,12 +822,16 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
     const exists = deps.fs.existsSync(configPath);
     if (!exists) {
       const hash = hashConfigRaw(null);
-      const config = applyTalkApiKey(
-        applyTalkConfigNormalization(
-          applyModelDefaults(
-            applyCompactionDefaults(
-              applyContextPruningDefaults(
-                applyAgentDefaults(applySessionDefaults(applyMessageDefaults({}))),
+      const config = normalizeConfigPaths(
+        applyTalkApiKey(
+          applyTalkConfigNormalization(
+            applyModelDefaults(
+              applyCompactionDefaults(
+                applyContextPruningDefaults(
+                  applyAgentDefaults(
+                    applySessionDefaults(applyLoggingDefaults(applyMessageDefaults({}))),
+                  ),
+                ),
               ),
             ),
           ),
@@ -953,8 +957,14 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
         applyTalkApiKey(
           applyTalkConfigNormalization(
             applyModelDefaults(
-              applyAgentDefaults(
-                applySessionDefaults(applyLoggingDefaults(applyMessageDefaults(validated.config))),
+              applyCompactionDefaults(
+                applyContextPruningDefaults(
+                  applyAgentDefaults(
+                    applySessionDefaults(
+                      applyLoggingDefaults(applyMessageDefaults(validated.config)),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
