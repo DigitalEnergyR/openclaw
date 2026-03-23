@@ -1,0 +1,27 @@
+CAHL Player Roster URLs (2025-2026 Season)
+============================================
+
+U11 Teams (schedule_id=477497, league_id=48409)
+------------------------------------------------
+U11T1 - Lethbridge:       http://cahlhockey.net/player_roster.php?team_id=1188380&schedule_id=477497&league_id=48409
+U11T1 - Medicine Hat:     http://cahlhockey.net/player_roster.php?team_id=1188378&schedule_id=477497&league_id=48409
+U11T3Y - High Country:    http://cahlhockey.net/player_roster.php?team_id=1188420&schedule_id=477497&league_id=48409
+U11T3Y - Nanton:          http://cahlhockey.net/player_roster.php?team_id=1188421&schedule_id=477497&league_id=48409
+U11T5W - High Country:    http://cahlhockey.net/player_roster.php?team_id=1188493&schedule_id=477497&league_id=48409
+U11T5W - Nanton:          http://cahlhockey.net/player_roster.php?team_id=1188483&schedule_id=477497&league_id=48409
+U11T6R - Foothills:       http://cahlhockey.net/player_roster.php?team_id=1188502&schedule_id=477497&league_id=48409
+U11T4W - Claresholm:      http://cahlhockey.net/player_roster.php?team_id=1188444&schedule_id=477497&league_id=48409
+U11T4W - Vulcan:          http://cahlhockey.net/player_roster.php?team_id=1188445&schedule_id=477497&league_id=48409
+
+U13 Teams (schedule_id=477499, league_id=48410)
+------------------------------------------------
+U13T1 - Okotoks:          http://cahlhockey.net/player_roster.php?team_id=1188511&schedule_id=477499&league_id=48410
+U13T2B - Okotoks:         http://cahlhockey.net/player_roster.php?team_id=1188531&schedule_id=477499&league_id=48410
+U13T2B - Cochrane (T1):   http://cahlhockey.net/player_roster.php?team_id=1188508&schedule_id=477499&league_id=48410
+U13T3B - Airdrie:         http://cahlhockey.net/player_roster.php?team_id=1188552&schedule_id=477499&league_id=48410
+U13T3B - Cochrane:        http://cahlhockey.net/player_roster.php?team_id=1188547&schedule_id=477499&league_id=48410
+U13T3B - Canmore:         http://cahlhockey.net/player_roster.php?team_id=1188551&schedule_id=477499&league_id=48410
+U13T3R - Foothills (T4):  http://cahlhockey.net/player_roster.php?team_id=1188582&schedule_id=477499&league_id=48410
+U13T4R - Claresholm (T3): http://cahlhockey.net/player_roster.php?team_id=1188535&schedule_id=477499&league_id=48410
+U13T4Y - Vulcan (T5):     http://cahlhockey.net/player_roster.php?team_id=1188594&schedule_id=477499&league_id=48410
+U13T5R - Nanton (T4):     http://cahlhockey.net/player_roster.php?team_id=1188583&schedule_id=477499&league_id=48410
