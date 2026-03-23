@@ -1,6 +1,6 @@
 CAHL Player Search Results (2025-2026 Season)
 ===============================================
-Searched 17 team rosters across U11 (league_id=48409) and U13 (league_id=48410)
+Searched 24 team rosters across U11 (league_id=48409) and U13 (league_id=48410)
 
 FOUND PLAYERS
 =============
@@ -51,9 +51,11 @@ Group 4:
 SUMMARY: 10 of 24 players found, 14 not found on checked CAHL teams.
 The 14 unfound players may be on Hockey Calgary tier teams or other league systems.
 
-Teams checked:
+Teams checked (20 total):
   U13T1 - Okotoks (1188511)
   U13T2B - Okotoks (1188531)
+  U13T3B - Okotoks Gold (1188549)
+  U13T3B - Okotoks Green (1188548)
   U13T2B - Cochrane T1 (1188508)
   U13T3B - Airdrie (1188552)
   U13T3B - Cochrane (1188547)
@@ -62,6 +64,9 @@ Teams checked:
   U13T4R - Claresholm T3 (1188535)
   U13T4Y - Vulcan T5 (1188594)
   U13T5R - Nanton T4 (1188583)
+  U11T1 - Okotoks (1188382)
+  U11T2B - Okotoks (1188396)
+  U11T3Y - Okotoks (1188418)
   U11T1 - Lethbridge (1188380)
   U11T1 - Medicine Hat (1188378)
   U11T3Y - High Country (1188420)
