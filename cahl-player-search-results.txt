@@ -1,0 +1,73 @@
+CAHL Player Search Results (2025-2026 Season)
+===============================================
+Searched 17 team rosters across U11 (league_id=48409) and U13 (league_id=48410)
+
+FOUND PLAYERS
+=============
+
+Group 1:
+  Brady WILLIAMS      | U13T4Y - Vulcan (T5) (AP)    | GP: 2  | G: 2  | A: 0  | PTS: 2   | player_id: 4596583
+  Reece LABERGE       | U13T3R - Foothills (T4)       | GP: 16 | G: 0  | A: 1  | PTS: 1   | player_id: 4533232
+  Carter CEDERSTRAND  | U13T2B - Okotoks              | GP: 15 | G: 2  | A: 3  | PTS: 5   | player_id: 4641535
+
+Group 2:
+  Brinley GALE-O'HANDLEY | U13T2B - Okotoks           | GP: 13 | G: 5  | A: 4  | PTS: 9   | player_id: 4531727
+  Kayden MEIER            | U13T4Y - Vulcan (T5) (G)   | GP: 15 | G: 0  | A: 0  | PTS: 0   | player_id: 4533333
+                          | Goalie stats: 14 GP, 3-8 record
+
+Group 3:
+  Brody HARKNESS      | U13T3R - Foothills (T4)       | GP: 15 | G: 8  | A: 2  | PTS: 10  | player_id: 4533229
+  Tyler MURRAY        | U13T3R - Foothills (T4)       | GP: 14 | G: 13 | A: 4  | PTS: 17  | player_id: 4533234
+
+Group 4:
+  Boston BROWN        | U13T2B - Okotoks              | GP: 16 | G: 5  | A: 7  | PTS: 12  | player_id: 4595949
+  Lewis GILLESPIE     | U11T3Y - Nanton               | GP: 16 | G: 12 | A: 16 | PTS: 28  | player_id: 4596236
+  Charles GAGNE       | U13T2B - Okotoks (G)          | GP: 16 | G: 0  | A: 0  | PTS: 0   | player_id: 4532445
+                      | Goalie stats: 8 GP, 3-5, 4.75 GAA, 0.840 SV%
+
+NOT FOUND on checked teams
+===========================
+
+Group 2:
+  Brooks LEE              | Not Found
+  Samuel MENDOZA DE LA CRUZ | Not Found
+
+Group 3:
+  Brylan GORDON       | Not Found
+  Nathan LANE         | Not Found
+  Liam SMILEY         | Not Found
+  Braydon RASSMUSSEN  | Not Found
+  Oakley HANSEN       | Not Found
+  Barrett THIESSEN    | Not Found
+  Bennett YOUNG       | Not Found
+
+Group 4:
+  Everett LAVALLEE    | Not Found
+  Allen XIA           | Not Found
+  Nolan SZESZORAK     | Not Found
+  Jacob JOHNSON       | Not Found  (note: WES Johnson on U13T3B Cochrane, BRODIE Johnson on U11T3Y High Country)
+  Yifan XIA           | Not Found
+
+SUMMARY: 10 of 24 players found, 14 not found on checked CAHL teams.
+The 14 unfound players may be on Hockey Calgary tier teams or other league systems.
+
+Teams checked:
+  U13T1 - Okotoks (1188511)
+  U13T2B - Okotoks (1188531)
+  U13T2B - Cochrane T1 (1188508)
+  U13T3B - Airdrie (1188552)
+  U13T3B - Cochrane (1188547)
+  U13T3B - Canmore (1188551)
+  U13T3R - Foothills T4 (1188582)
+  U13T4R - Claresholm T3 (1188535)
+  U13T4Y - Vulcan T5 (1188594)
+  U13T5R - Nanton T4 (1188583)
+  U11T1 - Lethbridge (1188380)
+  U11T1 - Medicine Hat (1188378)
+  U11T3Y - High Country (1188420)
+  U11T3Y - Nanton (1188421)
+  U11T5W - High Country (1188493)
+  U11T5W - Nanton (1188483)
+  U11T6R - Foothills (1188502)
+  U11T4W - Claresholm (1188444)
+  U11T4W - Vulcan (1188445)
