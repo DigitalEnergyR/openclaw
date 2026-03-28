@@ -1,0 +1,14 @@
+{
+  "name": "@openclaw/codesys-virtual-control",
+  "version": "2026.3.2",
+  "description": "CODESYS Virtual Control SL - Your PLC in a container",
+  "type": "module",
+  "dependencies": {
+    "node-opcua-client": "^2.133.0"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}
