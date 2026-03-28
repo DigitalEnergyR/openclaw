@@ -273,3 +273,51 @@ export function createPlcConnectTool() {
     },
   } as unknown as AnyAgentTool;
 }
+
+// ── Tool: plc_open_hmi ────────────────────────────────────────────────
+
+export function createPlcOpenHmiTool(cfg: CodesysVirtualControlConfig) {
+  return {
+    name: "plc_open_hmi",
+    label: "PLC Open HMI",
+    description:
+      "Open the CODESYS Web Visualization (HMI) in the default browser. " +
+      "The PLC container must be running with a deployed application that includes a WebVisu object.",
+    parameters: Type.Object({
+      host: Type.Optional(
+        Type.String({
+          description: "Hostname or IP to use in the URL (default: localhost).",
+        }),
+      ),
+    }),
+    async execute(_id: string, params: Record<string, unknown>) {
+      const host = typeof params.host === "string" ? params.host : "localhost";
+      const url = `http://${host}:${cfg.ports.webVisu}/webvisu.htm`;
+
+      const info = await inspectContainer(cfg);
+      if (info.state !== "running") {
+        return jsonResult({
+          error: "Container is not running. Start it first with plc_start.",
+          container: info,
+          url,
+        });
+      }
+
+      // Attempt to open the URL in the default browser
+      const { platform } = process;
+      const openCmd =
+        platform === "darwin" ? "open" : platform === "win32" ? "start" : "xdg-open";
+
+      const { execFile: execFileCb } = await import("node:child_process");
+      const { promisify } = await import("node:util");
+      const exec = promisify(execFileCb);
+      try {
+        await exec(openCmd, [url], { timeout: 5000 });
+      } catch {
+        // If we can't open the browser, just return the URL
+      }
+
+      return jsonResult({ url, opened: true, container: info });
+    },
+  } as unknown as AnyAgentTool;
+}

@@ -11,6 +11,7 @@ import {
   createPlcBrowseTool,
   createPlcCallMethodTool,
   createPlcConnectTool,
+  createPlcOpenHmiTool,
 } from "./src/tools.js";
 
 const plugin = {
@@ -36,6 +37,7 @@ const plugin = {
       createPlcBrowseTool() as unknown as AnyAgentTool,
       createPlcCallMethodTool() as unknown as AnyAgentTool,
       createPlcConnectTool() as unknown as AnyAgentTool,
+      createPlcOpenHmiTool(cfg) as unknown as AnyAgentTool,
     ];
 
     for (const tool of tools) {
