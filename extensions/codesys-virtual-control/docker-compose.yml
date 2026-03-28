@@ -1,0 +1,40 @@
+# CODESYS Virtual Control SL - Docker Compose overlay
+#
+# Run alongside the main OpenClaw stack:
+#   docker compose -f docker-compose.yml -f extensions/codesys-virtual-control/docker-compose.yml up -d
+#
+# Or standalone:
+#   docker compose -f extensions/codesys-virtual-control/docker-compose.yml up -d
+
+services:
+  codesys-virtual-plc:
+    image: codesys/codesys-virtual-control-sl:latest
+    container_name: codesys-virtual-plc
+    hostname: codesys-plc
+    privileged: true
+    restart: unless-stopped
+    ports:
+      # OPC UA server - primary communication channel
+      - "4840:4840"
+      # CODESYS gateway - connect from CODESYS IDE
+      - "11740:11740"
+      # Web visualization
+      - "8080:8080"
+    volumes:
+      # Persist PLC application and configuration across restarts
+      - codesys-data:/var/opt/codesys
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 4840 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  codesys-data:
+    driver: local
