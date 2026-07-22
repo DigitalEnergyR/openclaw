@@ -1,0 +1,19 @@
+{
+  "name": "campnab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Parks Canada campsite cancellation scanner (reservation.pc.gc.ca).",
+  "bin": {
+    "campnab": "./cli.ts"
+  },
+  "scripts": {
+    "campnab": "node --import tsx ./cli.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "vitest": "^2.1.8"
+  }
+}
