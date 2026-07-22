@@ -1,8 +1,12 @@
 /**
- * Minimal, dependency-free client for the Parks Canada reservation backend
- * (https://reservation.pc.gc.ca). This is the same JSON API the official
- * booking site calls; it is unofficial and undocumented, so treat the shapes
- * below as best-effort and defensive.
+ * Minimal, dependency-free client for the "GoingToCamp" reservation platform.
+ * Several park systems run white-labelled instances of the same backend and
+ * therefore share this exact JSON API - only the base URL, the park map ids,
+ * and the equipment catalog differ. Verified instances:
+ *   - Parks Canada  -> https://reservation.pc.gc.ca/api
+ *   - BC Parks      -> https://camping.bcparks.ca/api
+ * Pass the instance base URL via `baseUrl`. The API is unofficial and
+ * undocumented, so treat the shapes below as best-effort and defensive.
  *
  * Endpoints used:
  *   GET /api/availability/map                     -> loop/site availability grid
@@ -22,6 +26,7 @@
 /** The one availability code that means "bookable". */
 export const AVAILABILITY_OPEN = 0;
 
+/** Default base URL (Parks Canada) when a caller does not specify one. */
 export const PC_API_BASE = "https://reservation.pc.gc.ca/api";
 
 /** A recent desktop Chrome UA. The API 403s obviously-bot requests. */
@@ -95,7 +100,7 @@ export type FetchLike = (
   init?: { method?: string; headers?: Record<string, string>; signal?: AbortSignal },
 ) => Promise<{ ok: boolean; status: number; json: () => Promise<unknown> }>;
 
-export interface ParksCanadaClientOptions {
+export interface GoingToCampClientOptions {
   /** Injectable fetch (defaults to global fetch). Handy for tests. */
   fetchImpl?: FetchLike;
   userAgent?: string;
@@ -110,7 +115,7 @@ export interface ParksCanadaClientOptions {
 
 const defaultSleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
-export class ParksCanadaClient {
+export class GoingToCampClient {
   private readonly fetchImpl: FetchLike;
   private readonly userAgent: string;
   private readonly baseUrl: string;
@@ -121,7 +126,7 @@ export class ParksCanadaClient {
   /** Number of HTTP requests this client has issued (useful for reporting). */
   public requestCount = 0;
 
-  constructor(options: ParksCanadaClientOptions = {}) {
+  constructor(options: GoingToCampClientOptions = {}) {
     const globalFetch = (globalThis as { fetch?: FetchLike }).fetch;
     const resolved = options.fetchImpl ?? globalFetch;
     if (!resolved) {

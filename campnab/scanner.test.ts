@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   type FetchLike,
   type MapAvailabilityResponse,
-  ParksCanadaClient,
-} from "./parks-canada.ts";
+  GoingToCampClient,
+} from "./goingtocamp.ts";
 import { checkInDates, newlyOpenedSites, scanCampground } from "./scanner.ts";
 
 /** Build a fetch that serves canned map responses keyed by mapId. */
@@ -53,7 +53,7 @@ describe("scanCampground", () => {
         mapLinkAvailabilities: {},
       },
     });
-    const client = new ParksCanadaClient({ fetchImpl });
+    const client = new GoingToCampClient({ fetchImpl });
     const result = await scanCampground(client, {
       mapId: -100,
       start: "2026-08-01",
@@ -86,7 +86,7 @@ describe("scanCampground", () => {
         mapLinkAvailabilities: { "-1": [0] }, // points back to -1
       },
     });
-    const client = new ParksCanadaClient({ fetchImpl });
+    const client = new GoingToCampClient({ fetchImpl });
     const result = await scanCampground(client, {
       mapId: -1,
       start: "2026-08-01",
@@ -98,8 +98,35 @@ describe("scanCampground", () => {
     expect(result.totalSites).toBe(1);
   });
 
+  it("ignores the trailing checkout-day entry (API returns nights+1 entries)", async () => {
+    const fetchImpl = mapFetch({
+      [-1]: {
+        mapId: -1,
+        mapAvailabilities: [0],
+        resourceAvailabilities: {
+          // 1-night stay -> API returns 2 entries: [night, checkout-day].
+          "-10": daily([0, 1]), // night open, checkout day booked -> BOOKABLE
+          "-11": daily([1, 0]), // night booked, checkout day open -> NOT bookable
+          "-12": daily([0, 0]), // both open -> bookable
+        },
+        mapLinkAvailabilities: {},
+      },
+    });
+    const client = new GoingToCampClient({ fetchImpl });
+    const result = await scanCampground(client, {
+      mapId: -1,
+      start: "2026-09-15",
+      nights: 1,
+      equipmentCategoryId: -32768,
+      subEquipmentCategoryId: -32763,
+    });
+    expect(result.wholeStaySites.map((s) => s.resourceId).sort()).toEqual([-12, -10].sort());
+    // nightly is trimmed to the occupied night(s) only.
+    expect(result.wholeStaySites.every((s) => s.nightly.length === 1)).toBe(true);
+  });
+
   it("rejects invalid nights", async () => {
-    const client = new ParksCanadaClient({ fetchImpl: async () => ({ ok: true, status: 200, json: async () => ({}) }) });
+    const client = new GoingToCampClient({ fetchImpl: async () => ({ ok: true, status: 200, json: async () => ({}) }) });
     await expect(
       scanCampground(client, {
         mapId: -1,

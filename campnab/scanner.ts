@@ -1,5 +1,5 @@
 /**
- * Recursively walks a Parks Canada campground map, drilling from parent maps
+ * Recursively walks a GoingToCamp campground map, drilling from parent maps
  * into their child loops until it reaches leaf maps that expose site-level
  * availability, then reports which individual sites are bookable for the stay.
  */
@@ -7,8 +7,8 @@
 import {
   AVAILABILITY_OPEN,
   type MapAvailabilityQuery,
-  ParksCanadaClient,
-} from "./parks-canada.ts";
+  GoingToCampClient,
+} from "./goingtocamp.ts";
 import { addDays, assertIsoDate, daysBetween } from "./dates.ts";
 
 export interface ScanQuery {
@@ -57,7 +57,7 @@ function isBookable(code: number): boolean {
  * recursion, guarding against cycles and runaway depth.
  */
 export async function scanCampground(
-  client: ParksCanadaClient,
+  client: GoingToCampClient,
   query: ScanQuery,
 ): Promise<ScanResult> {
   assertIsoDate(query.start, "start date");
@@ -88,13 +88,18 @@ export async function scanCampground(
 
     for (const [resourceId, nights] of Object.entries(res.resourceAvailabilities ?? {})) {
       const nightly = nights.map((n) => n.availability);
-      const openNights = nightly.filter(isBookable).length;
+      // The API returns one entry per calendar day from start to end INCLUSIVE,
+      // i.e. `query.nights + 1` entries: the nights you occupy plus the checkout
+      // day. Only the first `query.nights` entries are nights that must be free;
+      // the trailing checkout-day entry is irrelevant to booking.
+      const occupied = nightly.slice(0, query.nights);
+      const openNights = occupied.filter(isBookable).length;
       sites.push({
         resourceId: Number(resourceId),
-        nightly,
+        nightly: occupied,
         openNights,
-        // Require a value for every requested night before calling it whole-stay.
-        openWholeStay: nightly.length === query.nights && nightly.every(isBookable),
+        // Whole-stay only if we saw every occupied night and all are bookable.
+        openWholeStay: occupied.length === query.nights && occupied.every(isBookable),
       });
     }
 

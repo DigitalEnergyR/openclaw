@@ -1,23 +1,26 @@
 #!/usr/bin/env node
 /**
- * campnab - a Parks Canada campsite cancellation scanner.
+ * campnab - a campsite cancellation scanner for GoingToCamp reservation systems
+ * (Parks Canada, BC Parks).
  *
- * Watches reservation.pc.gc.ca for openings at a campground (including sold-out
- * dates) and alerts you when a site matching your criteria frees up. Run a
- * one-shot scan, a flexible-date sweep, or a --watch loop with notifications.
+ * Watches for openings at a campground (including sold-out dates) and alerts you
+ * when a site matching your criteria frees up. Run a one-shot scan, a
+ * flexible-date sweep, or a --watch loop with notifications.
  *
- * Run:  node --import tsx campnab/cli.ts --help   (or: bun campnab/cli.ts --help)
+ * Run:  node --import tsx campnab/cli.ts --help
  */
 
-import { localizedName, ParksCanadaClient, type RootMap } from "./parks-canada.ts";
+import { localizedName, GoingToCampClient, type RootMap } from "./goingtocamp.ts";
 import { addDays, assertIsoDate, daysBetween, todayIso } from "./dates.ts";
 import { newlyOpenedSites, scanCampground, type ScanResult } from "./scanner.ts";
 import {
   buildBookingUrl,
-  EQUIPMENT,
+  DEFAULT_INSTANCE,
   type EquipmentOption,
+  type GoingToCampInstance,
   PARKS,
   resolveEquipment,
+  resolveInstance,
   resolvePark,
 } from "./registry.ts";
 import {
@@ -31,6 +34,7 @@ import {
 interface CliOptions {
   park?: string;
   mapId?: number;
+  instance?: string;
   resourceLocationId?: number;
   start: string;
   flexEnd?: string;
@@ -46,22 +50,26 @@ interface CliOptions {
   help: boolean;
 }
 
-const HELP = `campnab - Parks Canada campsite cancellation scanner
+const HELP = `campnab - campsite cancellation scanner for GoingToCamp reservation
+systems (Parks Canada + BC Parks)
 
 Usage:
   campnab --park <alias> --start <YYYY-MM-DD> [options]
-  campnab --map <id> --start <YYYY-MM-DD> [options]
+  campnab --map <id> [--instance <id>] --start <YYYY-MM-DD> [options]
 
 Target (one required):
-  --park <alias>          Known park (e.g. waterton-townsite). See --list-parks.
+  --park <alias>          Known park (e.g. waterton-townsite, moyie-lake,
+                          mabel-lake). See --list-parks.
   --map <id>              Any campground/loop map id (negative number).
+  --instance <id>         Reservation system for --map: parks-canada (default)
+                          or bc-parks.
   --resource-location <id>  Resource-location id for the booking link (with --map).
 
 Search:
   --start <YYYY-MM-DD>    Check-in date (default: tomorrow).
   --nights <n>            Nights to stay (default: 2).
   --flex-end <YYYY-MM-DD> Sweep every check-in from --start up to this date.
-  --equipment <alias>     Rig/tent type (default: small-tent). See --list-equipment.
+  --equipment <alias>     Rig/tent type (default: tent). See --list-equipment.
   --party <n>             Party size (default: 2).
 
 Watch mode:
@@ -71,8 +79,8 @@ Watch mode:
   --exec <cmd>            Run a shell command on an opening (CAMPNAB_* env vars).
 
 Info:
-  --list-parks            List reservable parks/campgrounds from the live API.
-  --list-equipment        List equipment aliases.
+  --list-parks [--instance <id>]     List reservable campgrounds from the live API.
+  --list-equipment [--instance <id>] List equipment aliases for an instance.
   --help                  Show this help.
 
 Availability is read from the same API the booking site uses. Only sites that
@@ -83,7 +91,7 @@ function parseArgs(argv: string[]): CliOptions {
   const opts: CliOptions = {
     start: addDays(todayIso(), 1),
     nights: 2,
-    equipment: "small-tent",
+    equipment: "tent",
     party: 2,
     watch: false,
     intervalSec: 300,
@@ -101,6 +109,7 @@ function parseArgs(argv: string[]): CliOptions {
     switch (arg) {
       case "--park": opts.park = need(i, arg); i++; break;
       case "--map": opts.mapId = Number(need(i, arg)); i++; break;
+      case "--instance": opts.instance = need(i, arg); i++; break;
       case "--resource-location": opts.resourceLocationId = Number(need(i, arg)); i++; break;
       case "--start": opts.start = need(i, arg); i++; break;
       case "--nights": opts.nights = Number(need(i, arg)); i++; break;
@@ -122,17 +131,25 @@ function parseArgs(argv: string[]): CliOptions {
   return opts;
 }
 
-function listEquipment(): void {
-  process.stdout.write("Equipment aliases:\n");
-  for (const [alias, opt] of Object.entries(EQUIPMENT)) {
+function listEquipment(instance: GoingToCampInstance): void {
+  process.stdout.write(`Equipment aliases for ${instance.label}:\n`);
+  for (const [alias, opt] of Object.entries(instance.equipment)) {
     process.stdout.write(`  ${alias.padEnd(12)} ${opt.label}\n`);
   }
-  process.stdout.write("  aliases: tent, rv, motorhome, trailer, camper, pickup\n");
+  process.stdout.write(`  synonyms: ${Object.keys(instance.equipmentSynonyms).join(", ")}\n`);
 }
 
-async function listParks(client: ParksCanadaClient): Promise<void> {
+async function listParks(client: GoingToCampClient, instance: GoingToCampInstance): Promise<void> {
+  const builtIn = Object.entries(PARKS).filter(([, p]) => p.instance === instance.id);
+  if (builtIn.length > 0) {
+    process.stdout.write(`Built-in --park aliases for ${instance.label}:\n`);
+    for (const [alias, p] of builtIn) {
+      process.stdout.write(`  --park ${alias.padEnd(18)} ${p.label}\n`);
+    }
+    process.stdout.write("\n");
+  }
   const roots = await client.getRootMaps();
-  process.stdout.write("Reservable locations (park -> campgrounds):\n");
+  process.stdout.write(`Reservable locations on ${instance.label} (area -> campgrounds):\n`);
   for (const root of roots as RootMap[]) {
     const parkName = localizedName(root.localizedValues);
     if (!parkName) continue;
@@ -153,6 +170,7 @@ async function listParks(client: ParksCanadaClient): Promise<void> {
 }
 
 interface Target {
+  instance: GoingToCampInstance;
   mapId: number;
   resourceLocationId: number;
   label: string;
@@ -161,14 +179,22 @@ interface Target {
 function resolveTarget(opts: CliOptions): Target {
   if (opts.park) {
     const p = resolvePark(opts.park);
-    return { mapId: p.mapId, resourceLocationId: p.resourceLocationId, label: p.label };
+    const instance = resolveInstance(p.instance);
+    return {
+      instance,
+      mapId: p.mapId,
+      resourceLocationId: p.resourceLocationId,
+      label: `${p.label} [${instance.label}]`,
+    };
   }
   if (opts.mapId != null && Number.isFinite(opts.mapId)) {
+    const instance = resolveInstance(opts.instance ?? DEFAULT_INSTANCE);
     return {
+      instance,
       mapId: opts.mapId,
       // Fall back to the map id; the booking link still opens the right area.
       resourceLocationId: opts.resourceLocationId ?? opts.mapId,
-      label: `map ${opts.mapId}`,
+      label: `map ${opts.mapId} [${instance.label}]`,
     };
   }
   throw new Error("Specify a target with --park <alias> or --map <id>. See --help.");
@@ -192,7 +218,7 @@ interface DatedScan {
 }
 
 async function scanAllDates(
-  client: ParksCanadaClient,
+  client: GoingToCampClient,
   target: Target,
   opts: CliOptions,
   equip: EquipmentOption,
@@ -214,6 +240,7 @@ async function scanAllDates(
 
 function bookingLinkFor(target: Target, date: string, opts: CliOptions, equip: EquipmentOption): string {
   return buildBookingUrl({
+    bookingHost: target.instance.bookingHost,
     resourceLocationId: target.resourceLocationId,
     mapId: target.mapId,
     startDate: date,
@@ -251,7 +278,7 @@ function reportOnce(scans: DatedScan[], target: Target, opts: CliOptions, equip:
 }
 
 async function runWatch(
-  client: ParksCanadaClient,
+  client: GoingToCampClient,
   target: Target,
   opts: CliOptions,
   equip: EquipmentOption,
@@ -302,23 +329,27 @@ export async function main(argv: string[]): Promise<number> {
     process.stdout.write(HELP + "\n");
     return 0;
   }
-  if (opts.listEquipment) {
-    listEquipment();
-    return 0;
-  }
 
-  const client = new ParksCanadaClient();
-
-  if (opts.listParks) {
-    await listParks(client);
-    return 0;
+  try {
+    if (opts.listEquipment) {
+      listEquipment(resolveInstance(opts.instance ?? DEFAULT_INSTANCE));
+      return 0;
+    }
+    if (opts.listParks) {
+      const instance = resolveInstance(opts.instance ?? DEFAULT_INSTANCE);
+      await listParks(new GoingToCampClient({ baseUrl: instance.apiBaseUrl }), instance);
+      return 0;
+    }
+  } catch (err) {
+    process.stderr.write(`${err instanceof Error ? err.message : String(err)}\n`);
+    return 2;
   }
 
   let target: Target;
   let equip: EquipmentOption;
   try {
     target = resolveTarget(opts);
-    equip = resolveEquipment(opts.equipment);
+    equip = resolveEquipment(target.instance, opts.equipment);
     if (!Number.isInteger(opts.nights) || opts.nights < 1) {
       throw new Error(`--nights must be a positive integer, got ${opts.nights}`);
     }
@@ -326,6 +357,8 @@ export async function main(argv: string[]): Promise<number> {
     process.stderr.write(`${err instanceof Error ? err.message : String(err)}\n`);
     return 2;
   }
+
+  const client = new GoingToCampClient({ baseUrl: target.instance.apiBaseUrl });
 
   if (opts.watch) {
     const notifiers: Notifier[] = [consoleNotifier()];
